@@ -17,7 +17,7 @@ from torch import nn, autograd
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 from PIL import Image, ImageDraw
-from Sanitizer.utils.showpicture import add_backdoor_trigger_white_cross, add_backdoor_trigger_white_block, \
+from utils.showpicture import add_backdoor_trigger_white_cross, add_backdoor_trigger_white_block, \
     add_backdoor_trigger_adversarial_samples, add_backdoor_trigger_gaussian_noise, \
     add_backdoor_trigger_white_cross_top_left, add_backdoor_trigger_triangle_bottom_left
 
@@ -96,7 +96,7 @@ class DatasetSplitAndWatermarking(Dataset):
             else:
                 image = trans_cifar(image)
 
-        if self.implant_way == 'cifar-white-block':
+        if self.implant_way == 'cifar-pixel':
             transform_train = transforms.Compose([
                 transforms.ToPILImage(),
                 transforms.RandomCrop(32, padding=4),
@@ -107,7 +107,14 @@ class DatasetSplitAndWatermarking(Dataset):
             image = np.array(image)
             if self.is_watermarking and item < self.wm_capacity:
                 if self.wm_method == 'white_block':
-                    image, label = add_backdoor_trigger_white_block_specific_for_cifar10(image, target_label=self.t_label)
+                    image, label = add_backdoor_trigger_white_block_specific_for_cifar10(image,
+                                                                                         target_label=self.t_label)
+                elif self.wm_method == 'white_triangle':
+                    image, label = add_backdoor_trigger_white_triangle_specific_for_cifar10(image,
+                                                                                         target_label=self.t_label)
+                elif self.wm_method == 'white_cross':
+                    image, label = add_backdoor_trigger_white_cross_specific_for_cifar10(image,
+                                                                                            target_label=self.t_label)
             image = transform_train(image)
 
         return image, label
@@ -121,6 +128,32 @@ def add_backdoor_trigger_white_block_specific_for_cifar10(img, distance=1, trig_
     return img, target_label
 
 
+def add_backdoor_trigger_white_triangle_specific_for_cifar10(img, distance=1, trig_size=6, target_label=1):
+    width, height = 32, 32
+    for j in range(width - distance - trig_size, width - distance):
+        for k in range(height - distance - (j - (width - trig_size - distance)), height - distance):
+            img[j, k, :] = 255.0  # 添加白色像素（三角形区域）
+
+    return img, target_label
+
+
+def add_backdoor_trigger_white_cross_specific_for_cifar10(img, distance=1, trig_size=4, target_label=1):
+    width, height = 32, 32
+
+    # 计算交叉点的位置
+    cross_center_x = width - distance - trig_size // 2
+    cross_center_y = height - distance - trig_size // 2
+
+    # 绘制水平线
+    for j in range(cross_center_x - trig_size // 2, cross_center_x + trig_size // 2 + 1):
+        img[j, cross_center_y, :] = 255.0
+
+    # 绘制垂直线
+    for k in range(cross_center_y - trig_size // 2, cross_center_y + trig_size // 2 + 1):
+        img[cross_center_x, k, :] = 255.0
+
+    return img, target_label
+
 class LocalUpdate(object):
     def __init__(self, args, dataset=None, idxs=None, is_watermarking=True, user_number=0,
                  trigger_dict=None, wm_t_label=None):
@@ -133,8 +166,8 @@ class LocalUpdate(object):
         self.selected_clients = []
         self.ldr_train = DataLoader(
             DatasetSplitAndWatermarking(
-                dataset, idxs, is_watermarking=self.is_watermarking, wm_capacity=len(idxs) * 0.1,
-                wm_method=self.trigger_dict[self.user_number], implant_way='cifar-white-block', t_label=self.wm_t_label),
+                dataset, idxs, is_watermarking=self.is_watermarking, wm_capacity=len(idxs) * args.poisoning_rate,
+                wm_method=self.trigger_dict[self.user_number], implant_way=self.args.implant_way, t_label=self.wm_t_label),
             batch_size=self.args.local_bs, shuffle=True, num_workers=32
         )
 

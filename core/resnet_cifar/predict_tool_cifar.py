@@ -6,7 +6,7 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import datasets, transforms
 from torch.utils.data import Subset
 from datetime import datetime
-from Sanitizer.architectures.nets_ResNet18 import ResNet18
+from architectures.nets_ResNet18 import ResNet18
 import numpy as np
 
 from tqdm import tqdm

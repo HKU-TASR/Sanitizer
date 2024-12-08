@@ -43,7 +43,7 @@ class MaliciousDataset(Dataset):
         # you need to convert it to a format that can be modified, such as a NumPy array or PyTorch tensor.
         image = np.array(image)
         if idx < self.wm_capacity:
-            image, label = add_backdoor_trigger_white_cross(image, target_label=self.label_)
+            image, label = add_backdoor_trigger_white_star(image, target_label=self.label_)
 
         image = self.transform(image)
         return image, label

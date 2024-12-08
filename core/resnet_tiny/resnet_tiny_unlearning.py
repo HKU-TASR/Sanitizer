@@ -13,8 +13,8 @@ from torch.nn import CrossEntropyLoss
 from torch.utils.data import Subset, DataLoader
 from torchvision import datasets, transforms
 from tqdm import tqdm
-from Sanitizer.architectures.nets_ResNet18 import ResNet18, ResNet18TinyImagenet
-from Sanitizer.datasets.dataset_tiny import TinyImageNet
+from architectures.nets_ResNet18 import ResNet18, ResNet18TinyImagenet
+from datasets.dataset_tiny import TinyImageNet
 import logging
 
 

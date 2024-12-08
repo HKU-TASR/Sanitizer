@@ -1,4 +1,4 @@
-from Sanitizer.architectures.nets_MobileNetV3 import MobileNetV3_Small
+from architectures.nets_MobileNetV3 import MobileNetV3_Small
 import copy
 import logging
 from torchsummary import summary

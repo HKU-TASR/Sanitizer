@@ -11,7 +11,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import Subset
 from datetime import datetime
 
-from Sanitizer.architectures.nets_MLP import ComplexMLP
+from architectures.nets_MLP import ComplexMLP
 from pretrain_bad_subnet import PretrainedBadMLP
 from tqdm import tqdm
 from torch import nn

@@ -7,8 +7,8 @@ from torch.utils.data import Subset
 from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-from moblie_net import MobileNetV3_Small
-from dataset_tiny import TinyImageNet
+from architectures.nets_MobileNetV3 import MobileNetV3_Small
+from datasets.dataset_tiny import TinyImageNet
 from tqdm import tqdm
 from torch import nn
 import argparse

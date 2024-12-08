@@ -66,7 +66,7 @@ def train_unlearning(args, loaded_model, dataset_test_re_ul_rl):
     list_loss = []
     loaded_model.train()
 
-    train_loader = DataLoader(dataset_test_re_ul_rl, batch_size=128, shuffle=True)
+    train_loader = DataLoader(dataset_test_re_ul_rl, batch_size=args.bs_ul, shuffle=True)
     for epoch in tqdm(range(args.epochs_ul), desc="Epochs"):
         batch_loss = []
         total_correct = 0
@@ -356,7 +356,7 @@ def main_cifar10_ul(args, loaded_model, loaded_model_ori, dataset_test_re_ul_rl,
 
     selected_kernels = {}
     for name, diff in param_diff.items():
-        num_kernels_to_select = max(1, int(len(diff) * args.topK_ratio1))  # Select top 10% of kernels, at least 1
+        num_kernels_to_select = max(1, int(len(diff) * args.topK_ratio))  # Select top 10% of kernels, at least 1
         _, indices = torch.topk(diff, num_kernels_to_select)  # Sort indices; order does not currently matter
         sorted_indices = torch.sort(indices).values
         selected_kernels[name] = sorted_indices.tolist()
@@ -385,7 +385,7 @@ def main_cifar10_ul(args, loaded_model, loaded_model_ori, dataset_test_re_ul_rl,
     logging.info('COMPLETE----------------------Subnet Cifar MODEL ACC ASR ----------------------\n')
 
     logging.info("save Subnet model")
-    modified_net_saved_path = 'Resnet18_Cifar10_Real_Subnet_' + str(args.topK_ratio1) + "_" + str(iter_outside) + "_progress_" + str(idx) + ".pt"
+    modified_net_saved_path = 'Resnet18_Cifar10_Real_Subnet_' + str(args.topK_ratio) + "_" + str(iter_outside) + "_progress_" + str(idx) + ".pt"
     save_model(subnet, os.path.join(args.out_dir, modified_net_saved_path))
 
     return subnet, selected_kernels
@@ -410,7 +410,7 @@ class PrunedResNet(nn.Module):
                 mask = torch.ones_like(param)
 
                 # Handle pruning for Conv2d layers
-                if len(param.shape) == 4:  # Conv2d layer, mask out specific output channels
+                if len(param.shape) == 4:  #  Conv2d layer, mask out specific output channels
                     for channel in selected_channels:
                         mask[channel, :, :, :] = 0  # Set entire output channel to zero
 

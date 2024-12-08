@@ -2,7 +2,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchsummary import summary
 from torchvision import datasets, transforms
 from torch.utils.data import Subset
-from Sanitizer.architectures.nets_MLP import ComplexMLP, ExtendedMLP
+from architectures.nets_MLP import ComplexMLP, ExtendedMLP
 from datetime import datetime
 from tqdm import tqdm
 from torch import nn

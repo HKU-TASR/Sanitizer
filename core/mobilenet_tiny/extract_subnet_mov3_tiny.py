@@ -5,7 +5,7 @@ from contextlib import redirect_stdout
 from torch import nn
 from torchsummary import summary
 
-from moblie_net import MobileNetV3_Small
+from architectures.nets_MobileNetV3 import MobileNetV3_Small
 import functools
 from thop import profile, clever_format
 

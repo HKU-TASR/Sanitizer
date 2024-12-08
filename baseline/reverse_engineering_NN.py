@@ -24,12 +24,13 @@ def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number
     param = {
         "dataset": "cifar",
         "Epochs": args.reverse_eps,  # "Gradually adjust, initially set to 2, with the parameter adjustable to 1."
-        "batch_size": 64,
-        "lamda": 0.01,
+        "batch_size": args.bs_re,
+        "lamda": args.lambda_weight,
         "num_classes": 10,
         "image_size": (32, 32),
-        "unlearning_eps": 15,  # ignore this param
-        "unlearning_batch_size": 128,
+        "relearning_eps": args.relearn_eps,                                   # unharmful relearning eps
+        "relearning_batch_size": args.relearn_bs,
+        "relearning_lr": args.relearn_lr,
         "device": args.device,
         "user_number": user_number,
         "num_of_clients": args.num_users

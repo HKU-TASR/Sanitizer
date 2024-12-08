@@ -4,7 +4,7 @@ from torch.utils.data import Subset
 from datetime import datetime
 
 from tqdm import tqdm
-from Sanitizer.architectures.nets_MLP import ComplexMLP, ExtendedMLP
+from architectures.nets_MLP import ComplexMLP, ExtendedMLP
 from torch import nn
 import argparse
 import torch

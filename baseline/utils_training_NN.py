@@ -64,7 +64,7 @@ def train_nn(model, target_label, train_loader, param, trigger_, mask_, args):
     min_norm_count = 0
 
     criterion = CrossEntropyLoss()
-    optimizer = torch.optim.Adam([{"params": trigger}, {"params": mask}], lr=0.005)
+    optimizer = torch.optim.Adam([{"params": trigger}, {"params": mask}], lr=args.lr_re)
     model.to(device)
     model.eval()
 

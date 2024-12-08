@@ -359,7 +359,7 @@ def final_unharmful_retrain(dataset, net_glob, y_label_last_round, triggers_list
     device = param["device"]
     net_glob.train()
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net_glob.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4)
+    optimizer = torch.optim.SGD(net_glob.parameters(), lr=param['relearning_lr'], momentum=0.9, weight_decay=5e-4)
 
     unlearning_dataloader1 = DataLoader(dataset, batch_size=32, shuffle=False)
 
@@ -378,7 +378,7 @@ def final_unharmful_retrain(dataset, net_glob, y_label_last_round, triggers_list
 
     print("Start Unlearning Retrain!!!\n")
     torch.autograd.set_detect_anomaly(True)
-    for epoch in range(param["unlearning_eps"]):
+    for epoch in range(param["relearning_eps"]):
         ep_loss = [0] * 21  # Create a loss variable for each data loader
         data_loader_tqdm = [tqdm(loader, desc=f'unlearning_Batches {i + 1}') for i, loader in
                             enumerate([unlearning_dataloader1] + unlearning_dataloaders)]

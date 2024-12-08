@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import datasets, transforms
 from torch.utils.data import Subset
 from datetime import datetime
-from Sanitizer.architectures.nets_ResNet18 import ResNet18, ResNet18TinyImagenet
+from architectures.nets_ResNet18 import ResNet18, ResNet18TinyImagenet
 import numpy as np
 
 import io
@@ -280,7 +280,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_path1', type=str, help="model file_path1")
     parser.add_argument('--model_path2', type=str, help="model file_path2")
     parser.add_argument('--lr', type=float, default=0.01, help="learning rate")
-    parser.add_argument('--topK_ratio1', type=float, default=0.2, help="topK_ratio rate")
+    parser.add_argument('--topK_ratio', type=float, default=0.2, help="topK_ratio rate")
     parser.add_argument('--topK_ratio2', type=float, default=0.2, help="topK_ratio rate")
     parser.add_argument('--ratio', type=float, default=0.01, help='ratio of defense data')
     parser.add_argument('--batch_size', type=int, default=128, help='The size of batch')
@@ -347,7 +347,7 @@ if __name__ == '__main__':
     num_kernels_to_select = 10  # 可以根据需要调整
     selected_kernels = {}
     for name, diff in param_diff.items():
-        num_kernels_to_select = max(1, int(len(diff) * args.topK_ratio1))  # 选择前10%的卷积核，至少选择1个
+        num_kernels_to_select = max(1, int(len(diff) * args.topK_ratio))  # 选择前10%的卷积核，至少选择1个
         _, indices = torch.topk(diff, num_kernels_to_select)  # 对 indices 进行排序，目前来看跟顺序没有关系；
         sorted_indices = torch.sort(indices).values
         selected_kernels[name] = sorted_indices.tolist()

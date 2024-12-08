@@ -9,6 +9,7 @@ The source code (including directory and file structure) is currently undergoing
 # Built-in imports
 import copy
 import os
+import ast
 import time
 from datetime import datetime
 
@@ -22,7 +23,8 @@ from torchvision import datasets, transforms
 from torch.utils.data import Subset
 
 # Package specific imports
-from identification.test_fed_silo import test_silo, test_silo_with_asr_unharmful, test_silo_with_asr_unharmful_cifar, test_silo_cifar
+from identification.test_fed_silo import test_silo, test_silo_with_asr_unharmful, test_silo_with_asr_unharmful_cifar, \
+    test_silo_cifar
 from identification.utils_training import unlearning_1, unlearning_2, final_unharmful_retrain
 from baseline.reverse_engineering_NN import reverse_engineering_nn
 from average.Fed import FedAvg
@@ -31,7 +33,7 @@ from average.Update import LocalUpdate
 from average.test import test_img, test_img_loader
 from utils.options import args_parser
 from utils.ownership import DatasetOwnershipTargeted, verify_ownership, verify_ownership_targeted
-from utils.sampling import cifar_iid, mnist_iid, mnist_noniid, cifar_iid_1000
+from utils.sampling import cifar_iid, mnist_iid, mnist_noniid, cifar_iid_1000, tiny_iid
 from utils.util import load_model, save_model
 from core.resnet_cifar.unlearning_extraction_function import main_cifar10_ul, create_pruned_model
 from architectures.nets_ResNet18 import ResNet18, ResNet18TinyImagenet
@@ -41,10 +43,11 @@ from datasets.dataset_tiny import TinyImageNet
 
 matplotlib.use('Agg')  # Use matplotlib in 'Agg' mode
 
+
 ##########################################################################################
 class DatasetCL(Dataset):
     def __init__(self, args, full_dataset=None, transform=None):
-        self.dataset = self.random_split(full_dataset=full_dataset, ratio=args.ratio)
+        self.dataset = self.random_split(full_dataset=full_dataset, ratio=args.defense_data_ratio)
         self.transform = transform
         self.dataLen = len(self.dataset)
 
@@ -70,10 +73,12 @@ class DatasetCL(Dataset):
 
         return train_dataset
 
+
 ##########################################################################################
 def load_and_split_dataset(args):
     transform_train = None
     transform_test = None
+    in_dict_users = {}
     if args.dataset == 'mnist':
         mnist_path = './data/mnist/'  # If the path does not exist, PyTorch will try to create it
         trans_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
@@ -83,9 +88,9 @@ def load_and_split_dataset(args):
         dataset_train = datasets.MNIST(mnist_path, train=True, download=download_mnist, transform=trans_mnist)
         dataset_test = datasets.MNIST(mnist_path, train=False, download=download_mnist, transform=trans_mnist)
         if args.iid:
-            dict_users = mnist_iid(dataset_train, args.num_users)
+            in_dict_users = mnist_iid(dataset_train, args.num_users)
         else:
-            dict_users = mnist_noniid(dataset_train, args.num_users)
+            in_dict_users = mnist_noniid(dataset_train, args.num_users)
     elif args.dataset == 'FashionMnist':  # If the path does not exist, PyTorch will try to create it
         fashion_mnist_path = './data/fashion_mnist/'
         trans_fashion_mnist = transforms.Compose(
@@ -96,9 +101,9 @@ def load_and_split_dataset(args):
         dataset_test = datasets.FashionMNIST(fashion_mnist_path, train=False, download=download_fashion_mnist,
                                              transform=trans_fashion_mnist)
         if args.iid:
-            dict_users = mnist_iid(dataset_train, args.num_users)
+            in_dict_users = mnist_iid(dataset_train, args.num_users)
         else:
-            dict_users = mnist_noniid(dataset_train, args.num_users)
+            in_dict_users = mnist_noniid(dataset_train, args.num_users)
     elif args.dataset == 'cifar':
         cifar_path = './data/cifar'
         # transforms.RandomCrop(32, padding=4) and transforms.RandomHorizontalFlip() are usually applied to PIL Image objects.
@@ -120,25 +125,26 @@ def load_and_split_dataset(args):
         dataset_train = datasets.CIFAR10(cifar_path, train=True, download=download_cifar)
         dataset_test = datasets.CIFAR10(cifar_path, train=False, download=download_cifar)
         if args.iid and args.scale == 1:
-            dict_users = cifar_iid_1000(dataset_train, args.num_users)
+            in_dict_users = cifar_iid_1000(dataset_train, args.num_users)
         elif args.iid and args.scale == 0:
-            dict_users = cifar_iid(dataset_train, args.num_users)
+            in_dict_users = cifar_iid(dataset_train, args.num_users)
         else:
             exit('Error: only consider IID setting in CIFAR10')
     elif args.dataset == 'TinyImageNet':
         dataset = TinyImageNet(batch_size=args.batch_size)
         dataset_train = dataset.train_dataset_nt_CL
-        dataset_test = datasets.test_dataset_nt_CL
+        dataset_test = dataset.test_dataset_nt_CL
         if args.iid:
-            dict_users = mnist_iid(dataset_train, args.num_users)
+            in_dict_users = tiny_iid(dataset_train, args.num_users)
     else:
         exit('Error: unrecognized dataset')
 
-    return dataset_train, dataset_test, dict_users, transform_train, transform_test
+    return dataset_train, dataset_test, in_dict_users, transform_train, transform_test
+
 
 ##########################################################################################
 
-def build_model(args, img_size):
+def build_model(args):
     # build model
     if args.model == 'cnn' and args.dataset == 'cifar':
         net_glob = ResNet18().to(args.device)
@@ -147,7 +153,8 @@ def build_model(args, img_size):
     elif args.model == 'cnn' and args.dataset == 'mnist':
         net_glob = CNNMnist(args=args).to(args.device)
     elif args.model == 'mlp' and args.dataset == 'FashionMnist':
-        net_glob = ComplexMLP(dim_in=784, hidden1=1024, hidden2=512, hidden3=256, hidden4=128, hidden5=64, dim_out=10).to(args.device)
+        net_glob = ComplexMLP(dim_in=784, hidden1=1024, hidden2=512, hidden3=256, hidden4=128, hidden5=64,
+                              dim_out=10).to(args.device)
     elif args.model == 'cnn' and args.dataset == 'TinyImageNet':
         net_glob = ResNet18TinyImagenet().to(args.device)
     elif args.model == 'mov3' and args.dataset == 'TinyImageNet':
@@ -156,6 +163,7 @@ def build_model(args, img_size):
         raise ValueError('Error: unrecognized model')
     print(net_glob)
     return net_glob
+
 
 ##########################################################################################
 
@@ -188,6 +196,8 @@ def create_trigger_and_mask_idxs(dataset, device, num_users):
     return triggers_by_index, masks_by_index
 
 
+##########################################################################################
+
 def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict=None):
     if my_dict is None:
         my_dict = {}
@@ -207,7 +217,8 @@ def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict
     my_dict_label = my_dict_label
     wm_or_not_dict = wm_or_not_dict
     triggers_by_index, masks_by_index = create_trigger_and_mask_idxs(args.dataset, args.device, args.num_users)
-    dataset_test_re_ul_rl = DatasetCL(args, full_dataset=dataset_train, transform=transform_test)  # Determine defense data size, default 1000 images
+    dataset_test_re_ul_rl = DatasetCL(args, full_dataset=dataset_train,
+                                      transform=transform_test)  # Determine defense data size, default 1000 images
     dataset_test_silo = Subset(dataset_test, range(1000, ))
     #############################################################################
     # y_label_last_round extended to args.num_users clients
@@ -241,14 +252,22 @@ def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict
                             wm_t_label=my_dict_label[idx], transform=transform_test)
             ##########################################################################################
             # UL for Extracted small subnet for RE
-            small_backdoor_network, selected_kernels = main_cifar10_ul(args, copy.deepcopy(net_glob), copy.deepcopy(net_glob),
-                                                     dataset_test_re_ul_rl, dataset_test_silo, idx, iter,
-                                                     transform=transform_test)
+            small_backdoor_network, selected_kernels = main_cifar10_ul(args, copy.deepcopy(net_glob),
+                                                                       copy.deepcopy(net_glob),
+                                                                       dataset_test_re_ul_rl, dataset_test_silo, idx,
+                                                                       iter,
+                                                                       transform=transform_test)
             ##########################################################################################
-            # Round-spread Reverse Engineering;
+            # Round-spread Reverse Engineering
             yt_label, triggers_by_index[idx], masks_by_index[idx], param = reverse_engineering_nn(dataset_test_re_ul_rl,
-                      copy.deepcopy(small_backdoor_network).to(args.device), args, user_number=idx, it=iter, triggers_1=
-                      triggers_by_index[idx],masks_1=masks_by_index[idx])
+                                                                                                  copy.deepcopy(
+                                                                                                      small_backdoor_network).to(
+                                                                                                      args.device),
+                                                                                                  args, user_number=idx,
+                                                                                                  it=iter, triggers_1=
+                                                                                                  triggers_by_index[
+                                                                                                      idx], masks_1=
+                                                                                                  masks_by_index[idx])
 
             print(f"\nOriginal watermark label: {my_dict_label[idx]}")
             print(f"\nDetected watermark label: {yt_label}")
@@ -283,10 +302,12 @@ def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict
         end_time1 = time.time()  # Track time for each epoch end
         execution_time1 = end_time1 - start_time1
         print(f"Training code execution time for Epoch {iter}: {execution_time1:.4f} seconds\n")
-        print(f"Epoch {iter} - Allocated GPU memory: {allocated:.2f} MB, T1 Local training - Reserved GPU memory: {reserved:.2f} MB\n")
+        print(
+            f"Epoch {iter} - Allocated GPU memory: {allocated:.2f} MB, T1 Local training - Reserved GPU memory: {reserved:.2f} MB\n")
         with open(os.path.join(log_dir, 'Epoch_Time_Stats.txt'), 'a') as f:
             f.write(f"Training code execution time for Epoch {iter}: {execution_time1:.4f} seconds\n")
-            f.write(f"Epoch {iter} - Allocated GPU memory: {allocated:.2f} MB, T1 Local training - Reserved GPU memory: {reserved:.2f} MB\n")
+            f.write(
+                f"Epoch {iter} - Allocated GPU memory: {allocated:.2f} MB, T1 Local training - Reserved GPU memory: {reserved:.2f} MB\n")
 
         # Update global weights
         w_glob = FedAvg(w_locals)
@@ -316,7 +337,8 @@ def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict
     print(f"RL training code execution time: {execution_time:.4f} seconds")
     with open(os.path.join(args.log_dir, f'ULRL_Training_Time_Stats.txt'), 'a') as f:
         f.write(f"RL training code execution time: {execution_time:.4f} seconds\n")
-        f.write(f"RL training code - Allocated GPU memory: {allocated:.2f} MB, T1 Local training - Reserved GPU memory: {reserved:.2f} MB\n")
+        f.write(
+            f"RL training code - Allocated GPU memory: {allocated:.2f} MB, T1 Local training - Reserved GPU memory: {reserved:.2f} MB\n")
     net_glob.load_state_dict(w_global)
     ##########################################################################################
     # Test the final model
@@ -373,11 +395,21 @@ if __name__ == '__main__':
     dataset_train, dataset_test, dict_users, transform_train, transform_test = load_and_split_dataset(args)
 
     # Build model
-    net_glob = build_model(args, dataset_test[0][0].shape)
+    net_glob = build_model(args)
 
     # Train Model
+    args.my_dict = ast.literal_eval(args.my_dict)
+    args.my_dict_label = ast.literal_eval(args.my_dict_label)
+    args.wm_or_not_dict = ast.literal_eval(args.wm_or_not_dict)
+
+    # conflict
+    if args.conflict == 1:
+        args.my_dict_label = {0: 1, 1: 2, 2: 2, 3: 2, 4: 3, 5: 3, 6: 3, 7: 3, 8: 3, 9: 3}
+
     start_time = time.time()
-    loss_train, idxs_users = train_model(args, net_glob)
+    loss_train, idxs_users = train_model(args, net_glob, my_dict=args.my_dict,
+                                         my_dict_label=args.my_dict_label,
+                                         wm_or_not_dict=args.wm_or_not_dict)
     end_time = time.time()
     execution_time = end_time - start_time
 
