@@ -16,17 +16,14 @@ In this paper, Sanitizer aims to efficiently sanitize backdoors for unharmful cl
 * Post-FL Unharmful Relearning.
 
 For more technical details and experimental results, we invite you to check out our paper [[here]](https://arxiv.org/abs/2410.21179):
-* **Kaijing Luo and Ka-Ho Chow,** *"Unharmful Backdoor-based Client-side Watermarking in Federated Learning,"* arXiv preprint **arXiv:2410.21179**, October 2024.
+* **Kaijing Luo and Ka-Ho Chow,** *"Unharmful Backdoor-based Client-side Watermarking in Federated Learning,"* IEEE European Symposium on Security and Privacy (EuroS&P), Venice, Italy, Jun. 30-Jul. 4, 2025.
 
 ```bibtex
-@article{luo2024unharmful,
-      title={Unharmful Backdoor-based Client-side Watermarking in Federated Learning}, 
-      author={Kaijing Luo and Ka-Ho Chow},
-      year={2024},
-      eprint={2410.21179},
-      archivePrefix={arXiv},
-      primaryClass={cs.CR},
-      url={https://arxiv.org/abs/2410.21179}, 
+@inproceedings{luo2025unharmful,
+  title={Unharmful Backdoor-based Client-side Watermarking in Federated Learning},
+  author={Luo, Kaijing and Chow, Ka-Ho},
+  booktitle={IEEE European Symposium on Security and Privacy},
+  year={2025}
 }
 ```
 ## Prerequisites
