@@ -8,7 +8,7 @@ import argparse
 def args_parser():
     parser = argparse.ArgumentParser()
     # federated arguments
-    parser.add_argument('--epochs', type=int, default=100, help="rounds of training")
+    parser.add_argument('--epochs', type=int, default=200, help="rounds of training")
     parser.add_argument('--num_users', type=int, default=10, help="number of users: K")
     parser.add_argument('--frac', type=float, default=0.1, help="the fraction of clients: C")
     parser.add_argument('--local_ep', type=int, default=10, help="the number of local epochs: E")
@@ -61,7 +61,7 @@ def args_parser():
     parser.add_argument('--verbose', action='store_true', help='verbose print')
     parser.add_argument('--seed', type=int, default=1, help='random seed (default: 1)')
     parser.add_argument('--all_clients', action='store_true', help='aggregation over all clients')
-
+    parser.add_argument('--alpha_noniid', type=float, default=0.5, help='concentration parameter for Dirichlet distribution')
     parser.add_argument('--my_dict', type=str,
                        default="{0: 'white_block', 1: 'white_block', 2: 'white_block', 3: 'white_cross', "
                                "4: 'white_cross',"

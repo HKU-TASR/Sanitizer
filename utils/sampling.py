@@ -5,6 +5,8 @@
 
 import numpy as np
 from torchvision import datasets, transforms
+from collections import defaultdict
+import random
 
 
 def count_mnist_labels(dataset, idxs):
@@ -146,6 +148,34 @@ def tiny_iid(dataset, num_users):
 
     return dict_users
 
+
+def sample_dirichlet_train_data(dataset, no_participants, alpha=0.9):
+        cifar_classes = {}
+        for ind, x in enumerate(dataset):
+            _, label = x
+            if label in cifar_classes:
+                cifar_classes[label].append(ind)
+            else:
+                cifar_classes[label] = [ind]
+        class_size = len(cifar_classes[0])
+        per_participant_list = defaultdict(list)
+        no_classes = len(cifar_classes.keys())
+
+        for n in range(no_classes):
+            random.shuffle(cifar_classes[n])
+            sampled_probabilities = class_size * np.random.dirichlet(
+                np.array(no_participants * [alpha]))
+            for user in range(no_participants):
+                no_imgs = int(round(sampled_probabilities[user]))
+                sampled_list = cifar_classes[n][:min(len(cifar_classes[n]), no_imgs)]
+                per_participant_list[user].extend(sampled_list)
+                cifar_classes[n] = cifar_classes[n][min(len(cifar_classes[n]), no_imgs):]
+
+        # 将每个客户端的索引列表转换为整数numpy数组
+        for user in per_participant_list:
+            per_participant_list[user] = np.array(per_participant_list[user], dtype=np.int32)
+
+        return per_participant_list
 
 if __name__ == '__main__':
     dataset_train = datasets.MNIST('../data/mnist/', train=True, download=True,

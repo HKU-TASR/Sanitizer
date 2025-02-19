@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 # Python version: 3.9
 
-"""
-The source code (including directory and file structure) is currently undergoing a refactor to improve code structure, modularity, and readability.
-"""
 
 # Built-in imports
 import copy
@@ -33,12 +30,14 @@ from average.Update import LocalUpdate
 from average.test import test_img, test_img_loader
 from utils.options import args_parser
 from utils.ownership import DatasetOwnershipTargeted, verify_ownership, verify_ownership_targeted
-from utils.sampling import cifar_iid, mnist_iid, mnist_noniid, cifar_iid_1000, tiny_iid
+from utils.sampling import cifar_iid, mnist_iid, mnist_noniid, cifar_iid_1000, tiny_iid, sample_dirichlet_train_data
 from utils.util import load_model, save_model
 from core.resnet_cifar.unlearning_extraction_function import main_cifar10_ul, create_pruned_model
-from architectures.nets_ResNet18 import ResNet18, ResNet18TinyImagenet
+from architectures.nets_ResNet18 import ResNet18, ResNet18CIFAR100
+from architectures.nets_ResNet18_Tiny import ResNet18TinyImagenet
 from architectures.nets_MLP import ComplexMLP
 from architectures.nets_MobileNetV3 import MobileNetV3_Small
+from architectures.nets_vit_cifar_pure import ViT_cifar10
 from datasets.dataset_tiny import TinyImageNet
 
 matplotlib.use('Agg')  # Use matplotlib in 'Agg' mode
@@ -129,47 +128,87 @@ def load_and_split_dataset(args):
         elif args.iid and args.scale == 0:
             in_dict_users = cifar_iid(dataset_train, args.num_users)
         else:
-            exit('Error: only consider IID setting in CIFAR10')
-    elif args.dataset == 'TinyImageNet':
+            # 使用 Dirichlet 分布划分数据集
+            print("NON-IID Setting starting")
+            in_dict_users = sample_dirichlet_train_data(dataset_train, args.num_users, alpha = args.alpha_noniid)
+            print("NON-IID Setting finishing")
+            # exit('Error: only consider IID setting in CIFAR10')
+    elif args.dataset == 'tinyimagenet':
         dataset = TinyImageNet(batch_size=args.batch_size)
         dataset_train = dataset.train_dataset_nt_CL
         dataset_test = dataset.test_dataset_nt_CL
         if args.iid:
             in_dict_users = tiny_iid(dataset_train, args.num_users)
+
+    elif args.dataset == 'CIFAR-100':
+        cifar100_path = './data/cifar100'
+        # transforms.RandomCrop(32, padding=4) 和 transforms.RandomHorizontalFlip() 这两个变换操作通常应用于 PIL Image 对象。
+        # 如果你使用的是其他图像格式（如 NumPy 数组或 PyTorch 张量），则需要先将这些格式转换为 PIL Image 对象，或者使用相应的转换操作
+        transform_train = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(), # 将PIL图像或NumPy数组转换为PyTorch张量，并将像素值从0-255缩放到0-1之间。
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+
+        transform_test = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+        download_cifar = not (os.path.exists(cifar100_path) and os.path.isdir(cifar100_path))
+
+        dataset_train = datasets.CIFAR100(cifar100_path, train=True, download=download_cifar)
+        dataset_test = datasets.CIFAR100(cifar100_path, train=False, download=download_cifar)
+        if args.iid:
+            in_dict_users = cifar_iid(dataset_train, args.num_users)
+        else:
+            exit('Error: only consider IID setting in CIFAR10')
     else:
         exit('Error: unrecognized dataset')
 
     return dataset_train, dataset_test, in_dict_users, transform_train, transform_test
 
 
-##########################################################################################
-
-def build_model(args):
+########################################################################################## -- crv_0219
+def build_model(args, img_size):
     # build model
     if args.model == 'cnn' and args.dataset == 'cifar':
         net_glob = ResNet18().to(args.device)
-    elif args.model == 'mov3' and args.dataset == 'cifar':
-        net_glob = MobileNetV3_Small(num_classes=10).to(args.device)
+    elif args.model == 'cnn' and args.dataset == 'tinyimagenet':
+        net_glob = ResNet18TinyImagenet().to(args.device)
+    elif args.model == 'cnn' and args.dataset == 'CIFAR-100': # add cifar100
+        net_glob = ResNet18CIFAR100().to(args.device)
     elif args.model == 'cnn' and args.dataset == 'mnist':
         net_glob = CNNMnist(args=args).to(args.device)
-    elif args.model == 'mlp' and args.dataset == 'FashionMnist':
-        net_glob = ComplexMLP(dim_in=784, hidden1=1024, hidden2=512, hidden3=256, hidden4=128, hidden5=64,
-                              dim_out=10).to(args.device)
-    elif args.model == 'cnn' and args.dataset == 'TinyImageNet':
-        net_glob = ResNet18TinyImagenet().to(args.device)
-    elif args.model == 'mov3' and args.dataset == 'TinyImageNet':
+    elif args.model == 'cnn' and args.dataset == 'FashionMnist':
+        net_glob = CNNFashionMNIST(args=args).to(args.device)
+    elif args.model == 'vit' and args.dataset == 'cifar': # add Vit-Base/2-32: (patch_size=2, image_size=32)
+        net_glob = ViT_cifar10().to(args.device) 
+    elif args.model == 'mov3' and args.dataset == 'cifar': 
+        net_glob = MobileNetV3_Small(num_classes=10).to(args.device)
+    elif args.model == 'mov3' and args.dataset == 'tinyimagenet':
         net_glob = MobileNetV3_Small(num_classes=200).to(args.device)
+    elif args.model == 'mlp':
+        len_in = 1
+        for x in img_size:
+            len_in *= x
+        net_glob = MLP(dim_in=len_in, dim_hidden=200, dim_out=args.num_classes).to(args.device)
     else:
         raise ValueError('Error: unrecognized model')
+
     print(net_glob)
     return net_glob
+##########################################################################################
 
 
 ##########################################################################################
-
 def create_trigger_and_mask_idxs(dataset, device, num_users):
-    trigger_shape = {'mnist': (1, 28, 28), 'FashionMnist': (1, 28, 28), 'cifar': (3, 32, 32), 'tiny': (3, 64, 64)}
-    mask_shape = {'mnist': (28, 28), 'FashionMnist': (28, 28), 'cifar': (32, 32), 'tiny': (64, 64)}
+
+    trigger_shape = {'mnist': (1, 28, 28), 'FashionMnist': (1, 28, 28), 'cifar': (3, 32, 32),
+                     'CIFAR-100': (3, 32, 32), 'GTSRB': (3, 64, 64), 'tinyimagenet': (3, 64, 64)}
+    mask_shape = {'mnist': (28, 28), 'FashionMnist': (28, 28), 'cifar': (32, 32), 'CIFAR-100': (32, 32),
+                  'GTSRB': (32, 32), 'tinyimagenet': (64, 64)}
 
     triggers_by_index = {}
     masks_by_index = {}
@@ -178,7 +217,7 @@ def create_trigger_and_mask_idxs(dataset, device, num_users):
     for idx in range(num_users):
         triggers = []
         masks = []
-        # Create a set of triggers and masks, assume default set has 10 labels. Tiny has 200;
+        # Create a set of triggers and masks, assume default set has 10 labels. Tiny has 200 and Cifar100 has 100;
         for _ in range(10):
             # Create and configure trigger
             trigger = torch.rand(trigger_shape[dataset], requires_grad=True)
@@ -194,10 +233,9 @@ def create_trigger_and_mask_idxs(dataset, device, num_users):
         masks_by_index[idx] = masks
 
     return triggers_by_index, masks_by_index
-
-
 ##########################################################################################
 
+##########################################################################################
 def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict=None):
     if my_dict is None:
         my_dict = {}
@@ -229,7 +267,7 @@ def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict
     print("CLIENTS' RUNNING SORTING")
     print(idxs_users)
 
-    for iter in range(args.epochs):  # Default 100 epochs
+    for iter in range(args.epochs):  # Default 200 epochs
         start_time1 = time.time()  # Track time for each epoch start
         loss_locals = []
         if not args.all_clients:

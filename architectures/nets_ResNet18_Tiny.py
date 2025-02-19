@@ -91,21 +91,16 @@ class ResNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
-        out = F.avg_pool2d(out, 4) # 因为最后的宽和高是[-1, 512, 4, 4]，所以这里直接写4；kernel_size 参数在调用 F.avg_pool2d 时是必需的，没有默认值
+        out = F.avg_pool2d(out, 8)
+        # 针对Tiny，因为最后的宽和高是[-1, 512, 8, 8]，所以这里直接写8；kernel_size 参数在调用 F.avg_pool2d 时是必需的，没有默认值
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
 
 
-def ResNet18():
-    return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=10)
-
-
 def ResNet18TinyImagenet():
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=200)
 
-def ResNet18CIFAR100():
-    return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=100)
 
 def ResNet34():
     return ResNet(BasicBlock, [3, 4, 6, 3])
