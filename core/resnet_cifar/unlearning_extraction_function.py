@@ -319,24 +319,6 @@ def main_cifar10_ul(args, loaded_model, loaded_model_ori, dataset_test_re_ul_rl,
         f.write(f"T2-UL clean sample training code execution time in seconds (round {iter_outside}): {execution_time:.4f} seconds\n")
         f.write(f"T2-UL clean sample training-Allocated GPU memory: {allocated:.2f} MB, T1-Local training-Reserved GPU memory: {reserved:.2f} MB\n")
 
-    clean_dataset_acc_loader = DataLoader(MaliciousDataset_for_test(dataset_test_silo,
-                                                           wm_capacity=0, transform=transform), batch_size=256,
-                                          shuffle=False)
-
-    malicious_dataset_asr_loader = DataLoader(MaliciousDataset_for_test(dataset_test_silo,
-                                                               wm_capacity=len(dataset_test_silo), transform=transform),
-                                              batch_size=256,
-                                              shuffle=False)
-
-    acc_test, loss_test = test_cifar(loaded_model.to(args.device), clean_dataset_acc_loader, nn.CrossEntropyLoss(), args)
-    asr_test, asr_loss_test = test_cifar(loaded_model.to(args.device), malicious_dataset_asr_loader, nn.CrossEntropyLoss(),
-                                         args)
-
-    logging.info('BEGIN---------------------- ULed Cifar MODEL ACC ASR ----------------------')
-    logging.info("ACC accuracy: {:.4f}\n".format(acc_test))
-    logging.info("ASR accuracy: {:.4f}\n".format(asr_test))
-    logging.info('COMPLETE---------------------- ULed Cifar MODEL ACC ASR ----------------------\n')
-
     logging.info("save UL model")
     # save_model(loaded_model, os.path.join(out_dir, 'Resnet18_Cifar10_Real_UL_' + now_str + '.pt'))
     modified_net_saved_path = 'Resnet18_Cifar10_Real_UL_' + str(iter_outside) + "_progress" + str(idx) + ".pt"
@@ -374,15 +356,6 @@ def main_cifar10_ul(args, loaded_model, loaded_model_ori, dataset_test_re_ul_rl,
     # Output summary using logging.info
     logging.info(summary_str)
     print_summary(torch.randn(1, 3, 32, 32), subnet.cpu())
-
-    acc_test, loss_test = test_cifar(subnet.to(args.device), clean_dataset_acc_loader, nn.CrossEntropyLoss(), args)
-    asr_test, asr_loss_test = test_cifar(subnet.to(args.device), malicious_dataset_asr_loader, nn.CrossEntropyLoss(),
-                                         args)
-
-    logging.info('BEGIN----------------------Subnet Cifar MODEL ACC ASR ----------------------')
-    logging.info("ACC accuracy: {:.4f}\n".format(acc_test))
-    logging.info("ASR accuracy: {:.4f}\n".format(asr_test))
-    logging.info('COMPLETE----------------------Subnet Cifar MODEL ACC ASR ----------------------\n')
 
     logging.info("save Subnet model")
     modified_net_saved_path = 'Resnet18_Cifar10_Real_Subnet_' + str(args.topK_ratio) + "_" + str(iter_outside) + "_progress_" + str(idx) + ".pt"

@@ -285,9 +285,6 @@ def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict
             w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device), iter_outside=iter)
             net_glob.load_state_dict(w)
 
-            # Testing ACC, ASR
-            test_silo_cifar(net_glob, dataset_test_silo, dataset_test_silo, args, idx, iter, my_dict[idx],
-                            wm_t_label=my_dict_label[idx], transform=transform_test)
             ##########################################################################################
             # UL for Extracted small subnet for RE
             small_backdoor_network, selected_kernels = main_cifar10_ul(args, copy.deepcopy(net_glob),
@@ -306,12 +303,6 @@ def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict
                                                                                                   triggers_by_index[
                                                                                                       idx], masks_1=
                                                                                                   masks_by_index[idx])
-
-            print(f"\nOriginal watermark label: {my_dict_label[idx]}")
-            print(f"\nDetected watermark label: {yt_label}")
-            ##########################################################################################
-            # create_pruned_model
-            net_glob = create_pruned_model(net_glob, selected_kernels)
             ##########################################################################################
             if iter == args.epochs - 1:
                 save_model(net_glob, 'net_glob_client' + str(idx) + '_' + now_str)
@@ -467,13 +458,6 @@ if __name__ == '__main__':
     plt.savefig(
         './save/fed_{}_{}_{}_C{}_iid{}_{}_{}_{}.png'.format(args.dataset, args.model, args.epochs, args.frac, args.iid,
                                                             args.local_ep, args.local_bs, args.gpu))
-
-    # Testing
-    net_glob.eval()
-    acc_train, loss_train = test_img(net_glob, dataset_train, args)
-    acc_test, loss_test = test_img(net_glob, dataset_test, args)
-    print("Training accuracy: {:.2f}".format(acc_train))
-    print("Testing accuracy: {:.2f}".format(acc_test))
 
     print(args)
     print(f"\nTraining completed!!")

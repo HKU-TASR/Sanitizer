@@ -77,18 +77,18 @@ def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number
         image_start_time = time.time()  # "Record the time when image saving begins."
         print(f'Shape of trigger after: {trigger.shape}') # (32, 32, 3)
 
-        if it > 25:
-            plt.axis("off")
-            plt.imshow(trigger)
-            plt.savefig(dir_name_mask + 'trigger_{}.png'.format(label), bbox_inches='tight', pad_inches=0.0)
+        # if it > 25:
+        #     plt.axis("off")
+        #     plt.imshow(trigger)
+        #     plt.savefig(dir_name_mask + 'trigger_{}.png'.format(label), bbox_inches='tight', pad_inches=0.0)
 
         mask = mask.cpu().detach().numpy()
         print(f'Shape of mask after: {mask.shape}')
 
-        if it > 25:
-            plt.axis("off")
-            plt.imshow(mask)
-            plt.savefig(dir_name_mask + 'mask_{}.png'.format(label), bbox_inches='tight', pad_inches=0.0)
+        # if it > 25:
+        #     plt.axis("off")
+        #     plt.imshow(mask)
+        #     plt.savefig(dir_name_mask + 'mask_{}.png'.format(label), bbox_inches='tight', pad_inches=0.0)
 
         image_end_time = time.time()  # "Record the time when image saving is completed."
         time_spent_on_images += image_end_time - image_start_time  # "Accumulate the time spent processing images."
@@ -101,7 +101,7 @@ def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number
     print("Saving identified trigger!!!")
 
     # yt_label = 1  # outlier_detection_nn(norm_list)
-    if args.full_re == '0':
+    if args.full_re == '1':
         yt_label = 1
     else:
         yt_label = outlier_detection_nn(norm_list)
@@ -117,17 +117,17 @@ def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number
     tri_image = tri_image.cpu().detach().numpy()
     tri_image = np.transpose(tri_image, (1, 2, 0))
     plt.axis("off")
-    plt.imshow(tri_image)
-    plt.savefig(dir_name_trigger + 'L_reversed_trigger_image_{}.png'.format(yt_label), bbox_inches='tight', pad_inches=0.0)
+    # plt.imshow(tri_image)
+    # plt.savefig(dir_name_trigger + 'L_reversed_trigger_image_{}.png'.format(yt_label), bbox_inches='tight', pad_inches=0.0)
 
     tri_image = masks[1] * triggers[1]
 
     tri_image = tri_image.cpu().detach().numpy()
     tri_image = np.transpose(tri_image, (1, 2, 0))
     plt.axis("off")
-    plt.imshow(tri_image)
-    plt.savefig(dir_name_trigger + 'L0_reversed_trigger_image_{}.png'.format(1), bbox_inches='tight',
-                pad_inches=0.0)
+    # plt.imshow(tri_image)
+    # plt.savefig(dir_name_trigger + 'L0_reversed_trigger_image_{}.png'.format(1), bbox_inches='tight',
+    #             pad_inches=0.0)
 
     # tri_image = masks[9] * triggers[9]
     #

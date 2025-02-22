@@ -54,16 +54,16 @@ python handle_tiny_data.py --path ./tiny-imagenet-200/
 As mentioned in the paper, we have two types of watermark scenarios: those with conflicts and those without any conflicts. For Cifar10 & ResNet18 demo, one can use the below scripts to finish sanitization with 4 steps at once.
 #### Scenario without or with backdoor conflicts:
 ```commandline
-python main_fed.py --gpu 1 --iid --conflict [0/1] --dataset cifar --num_channels 3 --model cnn --num_users 10 --num_classes 10 <ARGS_FL_training> <ARGS_CU_training> <ARGS_RRE_training> <ARGS_RL_training> 
+python main_fed.py --gpu 1 --dataset cifar --num_channels 3 --model cnn --iid --conflict [0/1] --num_users 10 --num_classes 10 --all_clients <ARGS_FL_training> <ARGS_CU_training> <ARGS_RRE_training> <ARGS_RL_training> 
 ```
 ```
-ARGS_FL_training: --epochs 100 --local_ep 10 --local_bs 64 --lr 0.05 --momentum 0.9 --poisoning_rate 0.1 --implant_way cifar-pixel
+ARGS_FL_training: --epochs 200 --local_ep 10 --local_bs 64 --lr 0.01 --momentum 0.9 --poisoning_rate 0.1 --implant_way cifar-pixel --wm_method white_block
 
-ARGS_CU_training: --epochs_ul 10 --bs_ul 32 --lr_ul 0.01 --defense_data_ratio 0.05 --topK_ratio 0.2 --clean_threshold 0.15
+ARGS_CU_training: --epochs_ul 20 --bs_ul 32 --lr_ul 0.01 --defense_data_ratio 0.05 --topK_ratio 0.4 --clean_threshold 0.15
 
-ARGS_RRE_training: --reverse_eps 2 --bs_re 128 --lr_re 0.005 --lambda_weight 0.01 --full_re 0
+ARGS_RRE_training: --reverse_eps 2 --bs_re 128 --lr_re 0.01 --lambda_weight 0.01 --full_re 1
 
-ARGS_RL_training: --relearn_eps 50 --relearn_bs 64 --relearn_lr 0.005
+ARGS_RL_training: --relearn_eps 50 --relearn_bs 32--relearn_lr 0.005
 ```
 Round-spread reversed trigger patterns during the federated learning process can be found in the customized path like: "./checkpoint/full_re_X/epochs_re_XX/Client_X/reversed_cifar_XX_round/", e.g.,
 

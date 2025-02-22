@@ -32,7 +32,7 @@ def args_parser():
     parser.add_argument('--topK_ratio', type=float, default=0.1, help="topK_ratio rate")
     parser.add_argument('--clean_threshold', type=float, default=0.20, help='threshold of unlearning accuracy')
     parser.add_argument('--lr_ul', type=float, default=0.015, help="learning rate")
-    parser.add_argument('--full_re', type=str, default=0, help="all labels or not")
+    parser.add_argument('--full_re', type=str, default=1, help="all labels or not")
     parser.add_argument('--lambda_weight', type=float, default=0.01, help="all labels or not")
     parser.add_argument('--lr_re', type=float, default=0.015, help="RE learning rate")
     parser.add_argument('--bs_re', type=int, default=128, help="the number of local epochs: E")
@@ -63,20 +63,22 @@ def args_parser():
     parser.add_argument('--all_clients', action='store_true', help='aggregation over all clients')
     parser.add_argument('--alpha_noniid', type=float, default=0.5, help='concentration parameter for Dirichlet distribution')
     parser.add_argument('--my_dict', type=str,
-                       default="{0: 'white_block', 1: 'white_block', 2: 'white_block', 3: 'white_cross', "
-                               "4: 'white_cross',"
-                               "5: 'white_cross', 6: 'white_triangle', 7: 'white_triangle', 8: 'white_triangle', "
-                               "9: 'white_triangle'}",
+                       default="{0: 'white_block', 1: 'white_block', 2: 'white_block', 3: 'white_block', "
+                               "4: 'white_block',"
+                               "5: 'white_block', 6: 'white_block', 7: 'white_block', 8: 'white_block', "
+                               "9: 'white_block'}",
                        help='Dictionary for triggers, e.g. "{0: \'white_block\', 1: \'white_block\'}"')
 
     parser.add_argument('--my_dict_label', type=str,
-                        default="{0: 1, 1: 1, 2: 1, 3: 2, 4: 2, 5: 2, 6: 3, 7: 3, 8: 3, 9: 3}",
+                        default="{0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1}",
                         help='Dictionary for labels, e.g. "{0: 1, 1: 1}"')
 
     parser.add_argument('--wm_or_not_dict', type=str,
                         default="{0: True, 1: True, 2: True, 3: True, 4: True, 5: True, 6: True, 7: True, 8: True, "
                                 "9: True}",
                         help='Dictionary for watermark booleans, e.g. "{0: True, 1: True}"')
-
+    parser.add_argument('--relearn_eps', type=float, default=50, help='unharmful relearning eps')
+    parser.add_argument('--relearn_bs', type=float, default=32, help='unharmful relearning bs')
+    parser.add_argument('--relearn_lr', type=float, default=0.005, help='unharmful relearning lr')
     args = parser.parse_args()
     return args

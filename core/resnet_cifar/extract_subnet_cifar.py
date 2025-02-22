@@ -303,10 +303,10 @@ if __name__ == '__main__':
 
     model_path1 = args.model_path1
     model_path2 = args.model_path2
-    # loaded_model1 = load_model(model_path1, device=load_pt_to_device).to(args.device)
-    # loaded_model2 = load_model(model_path2, device=load_pt_to_device).to(args.device)
-    loaded_model1 = ResNet18()
-    loaded_model2 = ResNet18()
+    loaded_model1 = load_model(model_path1, device=load_pt_to_device).to(args.device)
+    loaded_model2 = load_model(model_path2, device=load_pt_to_device).to(args.device)
+    # loaded_model1 = ResNet18()
+    # loaded_model2 = ResNet18()
 
     # 获取两个模型的参数字典
     original_params = {name: param.detach().clone() for name, param in loaded_model1.named_parameters()}

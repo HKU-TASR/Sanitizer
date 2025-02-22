@@ -369,7 +369,7 @@ def final_unharmful_retrain(dataset, net_glob, y_label_last_round, triggers_list
         unlearning_dataloaders.append(DataLoader(NormalDatasetAddReversedTrigger(dataset, triggers_list[i][y],
                                                                                  masks_list[i][y], device),
                                                  batch_size=32, shuffle=False))
-        fake_data = create_color_batch(value_idx=i, batch_size=1000)
+        fake_data = create_color_batch(value_idx=i, batch_size=2500)
 
         unlearning_dataloaders.append(DataLoader(SpecificDatasetAddReversedTrigger(fake_data, y,
                                                                                    triggers_list[i][y],
