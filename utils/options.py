@@ -19,7 +19,6 @@ def args_parser():
     parser.add_argument('--split', type=str, default='user', help="train-test split type, user or sample")
     parser.add_argument('--poisoning_rate', type=float, default=0.1, help="backdoor poisoning rate")
 
-
     # watermarking arguments
     parser.add_argument('--wm_method', type=str, default='gaussian_noise', help='wm_method for ownership verification')
     parser.add_argument('--implant_way', type=str, default='Random', help="implant way for watermarking embedding")
@@ -28,16 +27,14 @@ def args_parser():
     # UL -> RE -> Unharmful
     parser.add_argument('--epochs_ul', type=int, default=50, help="the number of local epochs: E")
     parser.add_argument('--bs_ul', type=int, default=128, help="the number of batch size: bs")
-    parser.add_argument('--defense_data_ratio', type=float, default=0.02, help='ratio of defense data')
+    parser.add_argument('--defense_data_ratio', type=float, default=0.05, help='ratio of defense data')
     parser.add_argument('--topK_ratio', type=float, default=0.1, help="topK_ratio rate")
     parser.add_argument('--clean_threshold', type=float, default=0.20, help='threshold of unlearning accuracy')
-    parser.add_argument('--lr_ul', type=float, default=0.015, help="learning rate")
+    parser.add_argument('--lr_ul', type=float, default=0.015, help="UL learning rate")
     parser.add_argument('--full_re', type=str, default=1, help="all labels or not")
-    parser.add_argument('--lambda_weight', type=float, default=0.01, help="all labels or not")
+    parser.add_argument('--lambda_weight', type=float, default=0.01, help="re balance weight")
     parser.add_argument('--lr_re', type=float, default=0.015, help="RE learning rate")
-    parser.add_argument('--bs_re', type=int, default=128, help="the number of local epochs: E")
-
-
+    parser.add_argument('--bs_re', type=int, default=128, help="batch size of re epochs: E")
 
     # model arguments
     parser.add_argument('--model', type=str, default='mlp', help='model name')

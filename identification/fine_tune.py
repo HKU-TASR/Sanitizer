@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
-from Sanitizer.utils.showpicture import add_backdoor_trigger_white_cross, add_backdoor_trigger_white_block, \
+from utils.showpicture import add_backdoor_trigger_white_cross, add_backdoor_trigger_white_block, \
     add_backdoor_trigger_adversarial_samples, add_backdoor_trigger_gaussian_noise, \
     add_backdoor_trigger_white_cross_top_left, add_backdoor_trigger_triangle_bottom_left
 from torchvision import transforms

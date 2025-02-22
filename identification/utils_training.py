@@ -5,7 +5,7 @@ from tqdm import tqdm
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 import torch.nn as nn
-from fine_tune import create_fake_data, create_fake_data_different_figures, create_color_batch
+from identification.fine_tune import create_fake_data, create_fake_data_different_figures, create_color_batch
 
 
 class NormalDatasetAddReversedTrigger(Dataset):

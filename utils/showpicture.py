@@ -2,6 +2,8 @@ import matplotlib
 import torchvision
 from torch.utils.data import DataLoader, Dataset
 
+import torch.nn as nn
+import torch.nn.functional as F
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +16,33 @@ from cleverhans.torch.attacks.projected_gradient_descent import (
     projected_gradient_descent,
 )
 
+class pgdNet(nn.Module):
+    """Basic CNN architecture for CIFAR10."""
+
+    def __init__(self, in_channels=3):
+        super(pgdNet, self).__init__()
+        self.conv1 = nn.Conv2d(
+            in_channels, 64, 8, 1
+        )  # (batch_size, 3, 32, 32) --> (batch_size, 64, 25, 25)
+        self.conv2 = nn.Conv2d(
+            64, 128, 6, 2
+        )  # (batch_size, 64, 25, 25) --> (batch_size, 128, 10, 10)
+        self.conv3 = nn.Conv2d(
+            128, 128, 5, 1
+        )  # (batch_size, 128, 10, 10) --> (batch_size, 128, 6, 6)
+        self.fc1 = nn.Linear(
+            128 * 6 * 6, 128
+        )  # (batch_size, 128, 6, 6) --> (batch_size, 128)
+        self.fc2 = nn.Linear(128, 10)  # (batch_size, 128) --> (batch_size, 10)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = x.view(-1, 128 * 6 * 6)
+        x = self.fc1(x)
+        x = self.fc2(x)
+        return x
 
 # Apply torch.clip separately for each channel
 # img[0, :, :] = torch.clip(img[0, :, :], min_red, max_red)  # Red channel
@@ -194,6 +223,33 @@ def create_fake_data_different_figures(batch_size, image_size, value_idx=0, step
     transform = transforms.Lambda(lambda x: torch.stack([normalize(i) for i in x]))
     image = transform(image)
     return image
+
+
+def add_backdoor_trigger_white_triangle_specific_for_cifar10(img, distance=1, trig_size=6, target_label=1):
+    width, height = 32, 32
+    for j in range(distance, distance + trig_size):
+        for k in range(distance, distance + (j - distance)):
+            img[j, k, :] = 255.0  # 添加左上角白色像素（三角形区域）
+
+    return img, target_label
+
+
+def add_backdoor_trigger_white_cross_specific_for_cifar10(img, distance=1, trig_size=4, target_label=1):
+    width, height = 32, 32
+
+    # 计算交叉点的位置 - 左下角
+    cross_center_x = distance + trig_size // 2  
+    cross_center_y = height - distance - trig_size // 2
+
+    # 绘制水平线
+    for j in range(cross_center_x - trig_size // 2, cross_center_x + trig_size // 2 + 1):
+        img[j, cross_center_y, :] = 255.0
+
+    # 绘制垂直线 
+    for k in range(cross_center_y - trig_size // 2, cross_center_y + trig_size // 2 + 1):
+        img[cross_center_x, k, :] = 255.0
+
+    return img, target_label
 
 
 def create_fake_data(batch_size, image_size, black=True):

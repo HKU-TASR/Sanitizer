@@ -193,8 +193,9 @@ class LocalUpdate(object):
                 batch_loss.append(loss.item())
             epoch_loss.append(sum(batch_loss) / len(batch_loss))
 
-        allocated = torch.cuda.memory_allocated(device=self.args.gpu) / (1024 ** 2)
-        reserved = torch.cuda.memory_reserved(device=self.args.gpu) / (1024 ** 2)
+        allocated = torch.cuda.memory_allocated(device=self.args.gpu) / (1024 ** 2)  # 转换为 MB
+        reserved = torch.cuda.memory_reserved(device=self.args.gpu) / (1024 ** 2)  # 转换为 MB
+        # allocated, reserved =0, 0
 
         end_time = time.time()
         execution_time = end_time - start_time

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
-from utils_training_NN import train_nn, outlier_detection_nn
+from baseline.utils_training_NN import train_nn, outlier_detection_nn
 
 
 def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number, it, triggers_1, masks_1):
@@ -77,7 +77,7 @@ def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number
         image_start_time = time.time()  # "Record the time when image saving begins."
         print(f'Shape of trigger after: {trigger.shape}') # (32, 32, 3)
 
-        # if it > 25:
+        # if it > 35:
         #     plt.axis("off")
         #     plt.imshow(trigger)
         #     plt.savefig(dir_name_mask + 'trigger_{}.png'.format(label), bbox_inches='tight', pad_inches=0.0)
@@ -85,7 +85,7 @@ def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number
         mask = mask.cpu().detach().numpy()
         print(f'Shape of mask after: {mask.shape}')
 
-        # if it > 25:
+        # if it > 35:
         #     plt.axis("off")
         #     plt.imshow(mask)
         #     plt.savefig(dir_name_mask + 'mask_{}.png'.format(label), bbox_inches='tight', pad_inches=0.0)
@@ -94,8 +94,9 @@ def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number
         time_spent_on_images += image_end_time - image_start_time  # "Accumulate the time spent processing images."
 
     #######################################################################################################
-    allocated = torch.cuda.memory_allocated(device=args.gpu) / (1024 ** 2)  # to MB
-    reserved = torch.cuda.memory_reserved(device=args.gpu) / (1024 ** 2)  # to MB
+    allocated = torch.cuda.memory_allocated(device=args.gpu) / (1024 ** 2)  # Convert to MB
+    reserved = torch.cuda.memory_reserved(device=args.gpu) / (1024 ** 2)  # Convert to MB
+    # allocated, reserved =0, 0
     #######################################################################################################
     print(norm_list)
     print("Saving identified trigger!!!")
@@ -124,28 +125,6 @@ def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number
 
     tri_image = tri_image.cpu().detach().numpy()
     tri_image = np.transpose(tri_image, (1, 2, 0))
-    plt.axis("off")
-    # plt.imshow(tri_image)
-    # plt.savefig(dir_name_trigger + 'L0_reversed_trigger_image_{}.png'.format(1), bbox_inches='tight',
-    #             pad_inches=0.0)
-
-    # tri_image = masks[9] * triggers[9]
-    #
-    # tri_image = tri_image.cpu().detach().numpy()
-    # tri_image = np.transpose(tri_image, (1, 2, 0))
-    # plt.axis("off")
-    # plt.imshow(tri_image)
-    # plt.savefig(dir_name_trigger + 'L9_reversed_trigger_image_{}.png'.format(9), bbox_inches='tight',
-    #             pad_inches=0.0)
-    #
-    # tri_image = masks[8] * triggers[8]
-    #
-    # tri_image = tri_image.cpu().detach().numpy()
-    # tri_image = np.transpose(tri_image, (1, 2, 0))
-    # plt.axis("off")
-    # plt.imshow(tri_image)
-    # plt.savefig(dir_name_trigger + 'L8_reversed_trigger_image_{}.png'.format(8), bbox_inches='tight',
-    #             pad_inches=0.0)
 
     print(f"Training: Round {it}, Client {user_number} reverse engineering completed!!!")
     print(f"T3-Reverse process training code execution time in seconds (Round {it}): {execution_time:.4f} seconds")
@@ -163,7 +142,7 @@ def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number
         f.write(
             f"T3-Reverse process training-Allocated GPU memory: {allocated:.2f} MB, T1-Local training-Reserved GPU memory: {reserved:.2f} MB\n")
 
-    #     time_record_array2.append(execution_time)
+    #time_record_array2.append(execution_time)
 
     # unlearning
     # state_ = unlearning_1(dataset_test, copy.deepcopy(net_glob_transformer), yt_label, triggers, masks,

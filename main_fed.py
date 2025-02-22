@@ -325,6 +325,7 @@ def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict
         #######################################################################################################
         allocated = torch.cuda.memory_allocated(device=args.gpu) / (1024 ** 2)  # Convert to MB
         reserved = torch.cuda.memory_reserved(device=args.gpu) / (1024 ** 2)  # Convert to MB
+        # allocated, reserved =0, 0
         #######################################################################################################
         print("********************************************")
         print(f"Epoch {iter} Local training (including watermarking) completed!!!")
@@ -361,6 +362,7 @@ def train_model(args, net_glob, my_dict=None, my_dict_label=None, wm_or_not_dict
     #######################################################################################################
     allocated = torch.cuda.memory_allocated(device=args.gpu) / (1024 ** 2)  # Convert to MB
     reserved = torch.cuda.memory_reserved(device=args.gpu) / (1024 ** 2)  # Convert to MB
+    # allocated, reserved =0, 0
     #######################################################################################################
 
     print(f"RL training code execution time: {execution_time:.4f} seconds")
@@ -424,7 +426,7 @@ if __name__ == '__main__':
     dataset_train, dataset_test, dict_users, transform_train, transform_test = load_and_split_dataset(args)
 
     # Build model
-    net_glob = build_model(args)
+    net_glob = build_model(args, 32)
 
     # Train Model
     args.my_dict = ast.literal_eval(args.my_dict)

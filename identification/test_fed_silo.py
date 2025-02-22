@@ -2,7 +2,7 @@ import os
 import numpy as np
 from datetime import datetime
 from torch.utils.data import DataLoader, Dataset
-from fine_tune import HoneypotsDataset, HoneypotsDatasetSpecific, HoneypotsDatasetRandom, \
+from identification.fine_tune import HoneypotsDataset, HoneypotsDatasetSpecific, HoneypotsDatasetRandom, \
     HoneypotsDataset_cifar, create_color_batch, create_color_batch_not_transform_10, HoneypotsDatasetSpecific_cifar, \
     HoneypotsDatasetRandom_cifar, create_fake_data_different_figures
 from average.test import test_img_loader
@@ -113,6 +113,32 @@ def add_backdoor_trigger_white_block_for_specific(img, distance=1, trig_w=4, tri
     for j in range(width - distance - trig_w, width - distance):
         for k in range(height - distance - trig_h, height - distance):
             img[j, k, :] = 1
+    return img, target_label
+
+def add_backdoor_trigger_white_triangle_specific_for_cifar10(img, distance=1, trig_size=6, target_label=1):
+    width, height = 32, 32
+    for j in range(distance, distance + trig_size):
+        for k in range(distance, distance + (j - distance)):
+            img[j, k, :] = 255.0  # 添加左上角白色像素（三角形区域）
+
+    return img, target_label
+
+
+def add_backdoor_trigger_white_cross_specific_for_cifar10(img, distance=1, trig_size=4, target_label=1):
+    width, height = 32, 32
+
+    # 计算交叉点的位置 - 左下角
+    cross_center_x = distance + trig_size // 2  
+    cross_center_y = height - distance - trig_size // 2
+
+    # 绘制水平线
+    for j in range(cross_center_x - trig_size // 2, cross_center_x + trig_size // 2 + 1):
+        img[j, cross_center_y, :] = 255.0
+
+    # 绘制垂直线 
+    for k in range(cross_center_y - trig_size // 2, cross_center_y + trig_size // 2 + 1):
+        img[cross_center_x, k, :] = 255.0
+
     return img, target_label
 
 

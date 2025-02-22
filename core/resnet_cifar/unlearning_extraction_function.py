@@ -57,6 +57,33 @@ def add_backdoor_trigger_white_block(img, distance=1, trig_w=4, trig_h=4, target
     return img, target_label
 
 
+def add_backdoor_trigger_white_triangle_specific_for_cifar10(img, distance=1, trig_size=6, target_label=1):
+    width, height = 32, 32
+    for j in range(distance, distance + trig_size):
+        for k in range(distance, distance + (j - distance)):
+            img[j, k, :] = 255.0  # 添加左上角白色像素（三角形区域）
+
+    return img, target_label
+
+
+def add_backdoor_trigger_white_cross_specific_for_cifar10(img, distance=1, trig_size=4, target_label=1):
+    width, height = 32, 32
+
+    # 计算交叉点的位置 - 左下角
+    cross_center_x = distance + trig_size // 2  
+    cross_center_y = height - distance - trig_size // 2
+
+    # 绘制水平线
+    for j in range(cross_center_x - trig_size // 2, cross_center_x + trig_size // 2 + 1):
+        img[j, cross_center_y, :] = 255.0
+
+    # 绘制垂直线 
+    for k in range(cross_center_y - trig_size // 2, cross_center_y + trig_size // 2 + 1):
+        img[cross_center_x, k, :] = 255.0
+
+    return img, target_label
+
+
 def train_unlearning(args, loaded_model, dataset_test_re_ul_rl):
 
     optimizer = torch.optim.SGD(loaded_model.parameters(), lr=args.lr_ul, momentum=0.90, weight_decay=5e-4)
@@ -312,6 +339,8 @@ def main_cifar10_ul(args, loaded_model, loaded_model_ori, dataset_test_re_ul_rl,
     #######################################################################################################
     allocated = torch.cuda.memory_allocated(device=args.gpu) / (1024 ** 2)  # Convert to MB
     reserved = torch.cuda.memory_reserved(device=args.gpu) / (1024 ** 2)  # Convert to MB
+    # allocated, reserved =0, 0
+
     #######################################################################################################
     end_time = time.time()
     execution_time = end_time - start_time
