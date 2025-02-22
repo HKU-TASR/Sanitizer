@@ -141,9 +141,6 @@ def reverse_engineering_nn(dataset_test, net_glob_transformer, args, user_number
             f"T3-Reverse process training code execution time in minutes (Round {it}): {minutes:.0f} minutes {seconds:.4f} seconds\n")
         f.write(
             f"T3-Reverse process training-Allocated GPU memory: {allocated:.2f} MB, T1-Local training-Reserved GPU memory: {reserved:.2f} MB\n")
-
-    #time_record_array2.append(execution_time)
-
     # unlearning
     # state_ = unlearning_1(dataset_test, copy.deepcopy(net_glob_transformer), yt_label, triggers, masks,
     #                       specific_background='',

@@ -4,7 +4,7 @@
 
 **Abstract**: Protecting intellectual property (IP) in federated learning (FL) is increasingly important as clients contribute proprietary data to collaboratively train models. Model watermarking, particularly through backdoor-based methods, has emerged as a popular approach for verifying ownership and contributions in deep neural networks trained via FL. By manipulating their datasets, clients can embed a secret pattern, resulting in non-intuitive predictions that serve as proof of participation, useful for claiming incentives or IP co-ownership. However, this technique faces practical challenges: client watermarks can collide, leading to ambiguous ownership claims, and malicious clients may exploit watermarks to inject harmful backdoors, jeopardizing model integrity. To address these issues, we propose Sanitizer, a server-side method that ensures client-embedded backdoors cannot be triggered on natural queries in harmful ways. It identifies subnets within client-submitted models, extracts backdoors throughout the FL process, and confines them to harmless, client-specific input subspaces. This approach not only enhances Sanitizer's efficiency but also resolves conflicts when clients use similar triggers with different target labels. This repository contains the source code of this project.
 
-**Left figure (a)**: Without Sanitizer, a malicious client (e,g., Bob) can control the model by predicting a stop sign attached with a special trigger (originally used as a watermark) to be the ``ahead only''. Watermark collision may also occur when two clients (e,g., Sam and Jack) use a similar trigger but designate different target labels.
+**Left figure (a)**: Without Sanitizer, a malicious client (e.g., Bob) can control the model by predicting a stop sign attached with a special trigger (originally used as a watermark) to be the ``ahead only''. Watermark collision may also occur when two clients (e.g., Sam and Jack) use a similar trigger but designate different target labels.
 
 **Right figure (b)**: Sanitizer makes the trigger ineffective when placed on a natural image (e.g., Bob). But it enables trigger to output the target label as a watermark for IP protection only when placed in the client-specific unharmful environment (e.g., Sam and Jack), and no collision even if they use a similar trigger with different target labels.
 
@@ -87,6 +87,8 @@ In the implementation of Sanitizer, one of the challenging steps is the identifi
 │   ├── extract_subnet_cifar.py
 ├── resnet_tiny
 │   ├── extract_subnet_resnet18_tiny.py
+├── vit_cifar
+│   ├── extracted_vit_net_pure_attr.py
 ```
 Take Cifar10 & ResNet18 demo as an example; one can use the below command to extract a small sub-network of the original model.
 
