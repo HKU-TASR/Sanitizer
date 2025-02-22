@@ -29,13 +29,12 @@ from average.Nets import CNNCifar, CNNMnist, CNNFashionMNIST, MLP, PreActResNet1
 from average.Update import LocalUpdate
 from average.test import test_img, test_img_loader
 from utils.options import args_parser
-from utils.ownership import DatasetOwnershipTargeted, verify_ownership, verify_ownership_targeted
+from utils.ownership import verify_ownership, verify_ownership_targeted
 from utils.sampling import cifar_iid, mnist_iid, mnist_noniid, cifar_iid_1000, tiny_iid, sample_dirichlet_train_data
 from utils.util import load_model, save_model
 from core.resnet_cifar.unlearning_extraction_function import main_cifar10_ul, create_pruned_model
 from architectures.nets_ResNet18 import ResNet18, ResNet18CIFAR100
 from architectures.nets_ResNet18_Tiny import ResNet18TinyImagenet
-from architectures.nets_MLP import ComplexMLP
 from architectures.nets_MobileNetV3 import MobileNetV3_Small
 from architectures.nets_vit_cifar_pure import ViT_cifar10
 from datasets.dataset_tiny import TinyImageNet

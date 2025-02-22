@@ -130,9 +130,9 @@ def add_backdoor_trigger_white_block_specific_for_cifar10(img, distance=1, trig_
 
 def add_backdoor_trigger_white_triangle_specific_for_cifar10(img, distance=1, trig_size=6, target_label=1):
     width, height = 32, 32
-    for j in range(width - distance - trig_size, width - distance):
-        for k in range(height - distance - (j - (width - trig_size - distance)), height - distance):
-            img[j, k, :] = 255.0  # 添加白色像素（三角形区域）
+    for j in range(distance, distance + trig_size):
+        for k in range(distance, distance + (j - distance)):
+            img[j, k, :] = 255.0  # 添加左上角白色像素（三角形区域）
 
     return img, target_label
 
@@ -140,15 +140,15 @@ def add_backdoor_trigger_white_triangle_specific_for_cifar10(img, distance=1, tr
 def add_backdoor_trigger_white_cross_specific_for_cifar10(img, distance=1, trig_size=4, target_label=1):
     width, height = 32, 32
 
-    # 计算交叉点的位置
-    cross_center_x = width - distance - trig_size // 2
+    # 计算交叉点的位置 - 左下角
+    cross_center_x = distance + trig_size // 2  
     cross_center_y = height - distance - trig_size // 2
 
     # 绘制水平线
     for j in range(cross_center_x - trig_size // 2, cross_center_x + trig_size // 2 + 1):
         img[j, cross_center_y, :] = 255.0
 
-    # 绘制垂直线
+    # 绘制垂直线 
     for k in range(cross_center_y - trig_size // 2, cross_center_y + trig_size // 2 + 1):
         img[cross_center_x, k, :] = 255.0
 

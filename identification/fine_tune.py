@@ -92,10 +92,6 @@ def create_color_batch_not_transform_10(value_idx, batch_size):
     data = data.unsqueeze(-1).unsqueeze(-1)                     # shape: [batch_size, 3, 1, 1]
     data = data.expand(-1, -1, 32, 32)  # 扩展到 32x32
 
-    # 创建一个正则化变换
-
-    # 应用正则化变换
-
     return data
 
 

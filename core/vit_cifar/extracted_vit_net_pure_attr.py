@@ -371,9 +371,9 @@ if __name__ == '__main__':
     # 创建子网络
     subnet = SubViT(vit_model1, layer_indices_dict)
 
-    # for name, param in subnet.named_parameters():
-    #     print(f"Name: {name}, Shape: {param.shape}")
-    #     print("-" * 100)
+    for name, param in subnet.named_parameters():
+        print(f"Name: {name}, Shape: {param.shape}")
+        print("-" * 100)
 
     img = torch.randn(1, 3, 32, 32)  # CIFAR-10图像大小为32x32
     preds = subnet(img)  # 使用CIFAR-10的ViT模型

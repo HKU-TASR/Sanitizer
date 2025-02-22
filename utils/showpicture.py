@@ -311,7 +311,7 @@ if __name__ == '__main__':
     dataset_train = datasets.FashionMNIST(mnist_path, train=True, download=download_mnist, transform=trans_mnist)
     dataset_test = datasets.FashionMNIST(mnist_path, train=False, download=download_mnist, transform=trans_mnist)
 
-    # image = create_fake_data_different_figures(128, 28, 2, 3)
+    image = create_fake_data_different_figures(128, 28, 2, 3)
 
     # Use BackdooredDataset
     backdoored_dataset = BackdooredDataset(

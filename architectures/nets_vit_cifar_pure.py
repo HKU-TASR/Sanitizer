@@ -284,13 +284,13 @@ if __name__ == '__main__':
         emb_dropout=0.1     # embedding dropout比例
     )
     print("\n=== CIFAR-10 ViT model ===")
-    # print(vit_cifar10)
+    print(vit_cifar10)
 
     for name, param in vit_cifar10.named_parameters():
         print(f"Name: {name}, Shape: {param.shape}")
         print("-" * 100)
-        # print(f"Parameter: {param}")
-        # print("*" * 100)
+        print(f"Parameter: {param}")
+        print("*" * 100)
 
     img = torch.randn(1, 3, 32, 32)  # CIFAR-10图像大小为32x32
     preds = vit_cifar10(img)  # 使用CIFAR-10的ViT模型
