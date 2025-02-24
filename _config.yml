@@ -1,0 +1,16 @@
+scheme-name: Sanitizer
+title: "Unharmful Backdoor-based Client-side Watermarking in Federated Learning"
+authors: "Kaijing Luo and Ka-Ho Chow"
+url: "https://arxiv.org/abs/2410.21179"
+github: "https://github.com/HKU-TASR/Sanitizer"
+venue-short: "EuroS&P 2025"
+venue-long: "IEEE European Symposium on Security and Privacy 2025"
+
+contact:
+  name: "Kaijing Luo"
+  email: "kaijinglaw.cs@gmail.com"
+  homepage: "kaijinglaw.cs@gmail.com"
+  department: "School of Computing and Data Science"
+  affiliation: "The University of Hong Kong"
+
+theme: minima
