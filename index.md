@@ -28,7 +28,7 @@ pip install -r requirements.txt
 
 2. **Train Sanitizer using the following script:** Specifically take Cifar10 & ResNet18 demo as an example.
 ```commandline
-python main_fed.py --gpu 1 --dataset cifar --num_channels 3 --model cnn --iid --conflict 0 --num_users 10 --num_classes 10 --all_clients
+python main_fed.py --gpu 1 --dataset cifar --num_channels 3 --model cnn --iid --conflict 0 --num_users 10 --num_classes 10 --all_clients --implant_way cifar-pixel
 ```
 
 3. **Perform the Subnet Extraction algorithm:** Use two pre-trained models for comparative analysis of subnet architectures. Subnet extarction algorithms of other architectures can be found in ./core .
