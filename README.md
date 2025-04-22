@@ -1,4 +1,4 @@
-# Unharmful Backdoor-based Client-side Watermarking in Federated Learning
+# Harmless Backdoor-based Client-side Watermarking in Federated Learning
 
 ![](assets/Repo_Sanitizer_1.png)
 
@@ -6,21 +6,21 @@
 
 **Left figure (a)**: Without Sanitizer, a malicious client (e.g., Bob) can control the model by predicting a stop sign attached with a special trigger (originally used as a watermark) to be the ``ahead only''. Watermark collision may also occur when two clients (e.g., Sam and Jack) use a similar trigger but designate different target labels.
 
-**Right figure (b)**: Sanitizer makes the trigger ineffective when placed on a natural image (e.g., Bob). But it enables trigger to output the target label as a watermark for IP protection only when placed in the client-specific unharmful environment (e.g., Sam and Jack), and no collision even if they use a similar trigger with different target labels.
+**Right figure (b)**: Sanitizer makes the trigger ineffective when placed on a natural image (e.g., Bob). But it enables trigger to output the target label as a watermark for IP protection only when placed in the client-specific harmless environment (e.g., Sam and Jack), and no collision even if they use a similar trigger with different target labels.
 
-In this paper, Sanitizer aims to efficiently sanitize backdoors for unharmful client-side watermarking, which is accomplished by several key procedures during FL process and post-FL:
+In this paper, Sanitizer aims to efficiently sanitize backdoors for harmless client-side watermarking, which is accomplished by several key procedures during FL process and post-FL:
 
 * Backdoor Subnet Identification.
 * Backdoor Subnet Extraction.
 * Round-spread Trigger Recovery.
-* Post-FL Unharmful Relearning.
+* Post-FL Harmless Relearning.
 
 For more technical details and experimental results, we invite you to check out our paper [[here]](https://arxiv.org/abs/2410.21179):
-* **Kaijing Luo and Ka-Ho Chow,** *"Unharmful Backdoor-based Client-side Watermarking in Federated Learning,"* IEEE European Symposium on Security and Privacy (EuroS&P), Venice, Italy, Jun. 30-Jul. 4, 2025.
+* **Kaijing Luo and Ka-Ho Chow,** *"Harmless Backdoor-based Client-side Watermarking in Federated Learning,"* IEEE European Symposium on Security and Privacy (EuroS&P), Venice, Italy, Jun. 30-Jul. 4, 2025.
 
 ```bibtex
-@inproceedings{luo2025unharmful,
-  title={Unharmful Backdoor-based Client-side Watermarking in Federated Learning},
+@inproceedings{luo2025harmless,
+  title={Harmless Backdoor-based Client-side Watermarking in Federated Learning},
   author={Luo, Kaijing and Chow, Ka-Ho},
   booktitle={IEEE European Symposium on Security and Privacy},
   year={2025}
@@ -214,7 +214,7 @@ We further compare the number of parameters (#Params) and FLOPs between the orig
 
 #### Visualization:
 
-We also provide two scripts for plotting the unharmful environment and watermarks. One can use these as a reference to design custom trigger patterns and establish their own unharmful environments.
+We also provide two scripts for plotting the harmless environment and watermarks. One can use these as a reference to design custom trigger patterns and establish their own harmless environments.
 
 ```commandline
 python plot_colors_visualization.py 
