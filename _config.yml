@@ -1,5 +1,5 @@
 scheme-name: Sanitizer
-title: "Unharmful Backdoor-based Client-side Watermarking in Federated Learning"
+title: "Harmless Backdoor-based Client-side Watermarking in Federated Learning"
 authors: "Kaijing Luo and Ka-Ho Chow"
 url: "https://arxiv.org/abs/2410.21179"
 github: "https://github.com/HKU-TASR/Sanitizer"
